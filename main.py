@@ -67,8 +67,8 @@ class PhoebeApp(object):
             "starting phoebe service"
         )
 
-        # self.schedule.every().minute.do(task)
-        self.schedule.every().monday.at("11:38").do(task)
+        self.schedule.every().minute.do(task)
+        # self.schedule.every().monday.at("11:38").do(task)
 
     def shutdown(self):
         """
