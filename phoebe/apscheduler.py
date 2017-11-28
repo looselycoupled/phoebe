@@ -19,8 +19,10 @@ module description
 
 from .config import logging
 import time
-import apscheduler
 
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.executors.pool import ProcessPoolExecutor
+from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from .callables import *
 
 ##########################################################################
@@ -33,7 +35,15 @@ class APSchedulerApp(object):
     """
 
     def __init__(self):
-        self.schedule = schedule.Scheduler()
+        self.schedule = BackgroundScheduler({
+            'apscheduler.executors.default': {
+                # 'class': 'apscheduler.executors.pool:ProcessPoolExecutor',
+                'class': 'apscheduler.executors.pool:ThreadPoolExecutor',
+                'max_workers': '4'
+            },
+            'apscheduler.job_defaults.coalesce': 'false',
+            'apscheduler.timezone': 'UTC',
+        })
         self.logger = logging.getLogger("phoebe")
 
     def tattle(self):
@@ -41,8 +51,9 @@ class APSchedulerApp(object):
 
         """
         self.logger.debug("Phoebe Job Schedule:")
-        for item in self.schedule.jobs:
+        for item in self.schedule.get_jobs():
             self.logger.debug(item)
+        # import pdb; pdb.set_trace()
 
     def run(self):
         """
@@ -54,7 +65,6 @@ class APSchedulerApp(object):
         # Run pending and handle results
         while True:
             try:
-                self.schedule.run_pending()
                 time.sleep(1)
 
                 counter += 1
@@ -74,12 +84,13 @@ class APSchedulerApp(object):
         """
         # Log the startup
         self.logger.info(
-            "starting phoebe service"
+            "starting phoebe service (apscheduler)"
         )
 
-        self.schedule.every().tuesday.do(task1)
-        self.schedule.every(2).minutes.do(task2)
-        # self.schedule.every().monday.at("11:38").do(task)
+        self.schedule.start()
+
+        self.schedule.add_job(task_schedule, 'interval', seconds=5)
+        self.schedule.add_listener(self.result, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
 
     def shutdown(self):
         """
@@ -97,8 +108,35 @@ class APSchedulerApp(object):
         self.logger.critical(error)
         self.logger.critical("hard termination of phoebe insight service")
 
+    @staticmethod
+    def result(event):
+        print(event.retval)
+        
+        # import pdb; pdb.set_trace()
 
-
+        # result = event.retval
+        # if result is not None:
+        #     available = globals()
+        #     if result.get('success', True):
+        #
+        #         # if result contains items to enqueue then do so here.
+        #         if 'tasks' in result:
+        #             for sig in result['tasks']:
+        #                 if sig['klass'] in available:
+        #                     task = available[sig['klass']]
+        #                     self.schedule.add_job(task)
+        #
+        #         self.logger.info(
+        #             "{type} {taskid} completed by proc {pid}".format(**result)
+        #         )
+        #     else:
+        #         error = result['result']
+        #         error['task'] = result['type']
+        #         error['taskid'] = result['taskid']
+        #
+        #         self.logger.error(
+        #             "{task} {taskid} errored {type}: {error}".format(**error)
+        #         )
 ##########################################################################
 # Execution
 ##########################################################################

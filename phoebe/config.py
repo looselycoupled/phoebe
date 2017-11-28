@@ -37,7 +37,7 @@ configuration = {
 
     'formatters': {
         'simple': {
-            'format': '%(name)s %(levelname)s [%(asctime)s] %(message)s',
+            'format': '%(name)s %(process)d %(levelname)s [%(asctime)s] %(message)s',
             'datefmt': ISO8601_DATETIME,
         }
     },
