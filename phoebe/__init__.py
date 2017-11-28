@@ -17,23 +17,17 @@ module description
 # Imports
 ##########################################################################
 
-from phoebe import ScheduleApp, APSchedulerApp
+from .schedule import ScheduleApp
+from .apscheduler import APSchedulerApp
 
 ##########################################################################
 # Classes
 ##########################################################################
 
-def test_schedule():
-    app = ScheduleApp()
-    app.run()
-
-def test_apscheduler():
-    app = APSchedulerApp()
-    app.run()
 
 ##########################################################################
 # Execution
 ##########################################################################
 
 if __name__ == '__main__':
-    test_apscheduler()
+    pass

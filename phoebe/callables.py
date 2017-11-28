@@ -17,23 +17,26 @@ module description
 # Imports
 ##########################################################################
 
-from phoebe import ScheduleApp, APSchedulerApp
+from datetime import datetime
+
+from .config import logging
 
 ##########################################################################
-# Classes
+# Functions
 ##########################################################################
 
-def test_schedule():
-    app = ScheduleApp()
-    app.run()
+def task1():
+    logger = logging.getLogger("phoebe")
+    logger.info("task1: execution at {}".format(datetime.now()))
 
-def test_apscheduler():
-    app = APSchedulerApp()
-    app.run()
+def task2():
+    logger = logging.getLogger("phoebe")
+    logger.info("task2: execution at {}".format(datetime.now()))
+
 
 ##########################################################################
 # Execution
 ##########################################################################
 
 if __name__ == '__main__':
-    test_apscheduler()
+    pass
